@@ -111,11 +111,6 @@ def evaluate_multiple(ground_truths, prediction_scores, compute_micro_macro_avg=
                                                                                    prediction_score_array.ravel())
         avg_precisions["micro"] = average_precision_score(gt_label_array, prediction_score_array, average="micro")
 
-        # # Compute Macro Avg.
-        # precisions["macro"], recall["macro"], _ = precision_recall_curve(gt_label_array.ravel(),
-        #                                                                            prediction_score_array.ravel())
-        # avg_precisions["macro"] = average_precision_score(gt_label_array, prediction_score_array, average="macro")
-
     return precisions, recalls, thresholds, avg_precisions
 
 
