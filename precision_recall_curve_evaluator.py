@@ -2,8 +2,9 @@ import numpy as np
 from sklearn.metrics import roc_curve, auc
 from sklearn.metrics import precision_recall_curve
 from sklearn.metrics import average_precision_score
-from scipy import interp
 import matplotlib.pyplot as plt
+from scipy import interp
+
 
 def evaluate_binary(ground_truth, prediction_scores):
     """
