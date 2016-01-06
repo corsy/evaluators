@@ -1,9 +1,14 @@
 import numpy as np
 from sklearn.metrics import precision_recall_fscore_support
 
-# Find the max indices in prediction results
+
 def find_max_indices(prediction_results):
 
+    """
+    Find the max indices in prediction results
+    :param prediction_results:
+    :return:
+    """
     N = prediction_results.shape[0]
     indices = np.zeros(N, dtype=int)
 
@@ -14,23 +19,6 @@ def find_max_indices(prediction_results):
         indices[i] = idx
 
     return indices
-
-
-# Find the max indices in prediction results
-def find_binary_values(prediction_results, multiple_index, threshold):
-
-    N = prediction_results.shape[0]
-    values = np.zeros(N, dtype=int)
-
-    # Find max probability in each row
-    for i in range(0, N):
-        result = prediction_results[i]
-
-        if (result[multiple_index] >= threshold):
-            values[i] = 1
-
-    return values
-
 
 # Evaluate Multiple Class
 def evaluate_mutiple(ground_truth, prediction, find_max=False, f_beta = 1.0, avg_method=None):
@@ -66,6 +54,27 @@ def evaluate_mutiple(ground_truth, prediction, find_max=False, f_beta = 1.0, avg
     return precision, recall, f_value
 
 
+def find_binary_values(prediction_results, multiple_index, threshold):
+    """
+    Find the item that beyond the threshold
+    :param prediction_results:
+    :param multiple_index:
+    :param threshold:
+    :return:
+    """
+    N = prediction_results.shape[0]
+    values = np.zeros(N, dtype=int)
+
+    # Find max probability in each row
+    for i in range(0, N):
+        result = prediction_results[i]
+
+        if result[multiple_index] >= threshold:
+            values[i] = 1
+
+    return values
+
+
 # Evaluate Binary Class
 def evaluate_binary(ground_truth, prediction, multiple_index=None, threshold=None, f_beta=1.0):
     """
@@ -76,7 +85,7 @@ def evaluate_binary(ground_truth, prediction, multiple_index=None, threshold=Non
     """
 
     prediction_results = prediction
-    if threshold != None and multiple_index != None:
+    if threshold is not None and multiple_index is not None:
         prediction_results = find_binary_values(prediction, multiple_index, threshold)
 
     # Find Precision & Recall & F-value
