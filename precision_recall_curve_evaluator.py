@@ -1,5 +1,7 @@
 import numpy as np
 from sklearn.metrics import roc_curve, auc
+from sklearn.metrics import precision_recall_curve
+from sklearn.metrics import average_precision_score
 from scipy import interp
 import matplotlib.pyplot as plt
 
@@ -9,16 +11,16 @@ def evaluate_binary(ground_truth, prediction_scores):
     :param ground_truth: 1-d array, e.g. gt: [1, 0, 1, 0, 1], note: 0 or 1
     :param prediction_scores: 1-d array, probability for positive example,
                               e.g. pred: [0.3, 0.4, 0.1, 0.3]
-    :return:  false_positive_rate, true_positive_rate, thresholds, roc_auc
+    :return:  precision, recall, thresholds, avg_precision
     """
 
-    false_positive_rate, true_positive_rate, thresholds = roc_curve(ground_truth, prediction_scores)
-    roc_auc = auc(false_positive_rate, true_positive_rate)
+    precision, recall, thresholds = precision_recall_curve(ground_truth, prediction_scores)
+    avg_precision = average_precision_score(ground_truth, prediction_scores)
 
-    return false_positive_rate, true_positive_rate, thresholds, roc_auc
+    return precision, recall, thresholds, avg_precision
 
 
-def plot_roc_curve_binary(false_positive_rate, true_positive_rate, roc_auc, plot_title=None):
+def plot_precision_recall_curve_binary(precision, recall, avg_precision, plot_title=None):
 
     if plot_title is None:
         plot_title = 'ROC Curves'
@@ -26,14 +28,12 @@ def plot_roc_curve_binary(false_positive_rate, true_positive_rate, roc_auc, plot
     # Init matplotlib
     fig = plt.figure()
 
-    plt.plot(false_positive_rate, true_positive_rate, label='ROC curve (area = {0:0.2f})'
-                                                                        ''.format(roc_auc))
+    plt.plot(precision, recall, label='Precision & Recall (AUC = {0:0.2f})'.format(avg_precision))
 
-    plt.plot([0, 1], [0, 1], 'k--')
-    plt.xlim([0.0, 1.0])
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
     plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
+    plt.xlim([0.0, 1.0])
     plt.title(plot_title)
     plt.legend(loc="lower right")
 
@@ -42,12 +42,12 @@ def plot_roc_curve_binary(false_positive_rate, true_positive_rate, roc_auc, plot
 
 def draw_roc_curve_binary(ground_truth, prediction_score, plot_title=None):
 
-    # Compute Roc values
-    false_positive_rate, true_positive_rate, threshold, roc_auc = \
+    # Compute Precision Recall curve
+    precision, recall, thresholds, avg_precision = \
         evaluate_binary(ground_truth, prediction_score)
 
     # Plot ROC curve
-    fig = plot_roc_curve_binary(false_positive_rate, true_positive_rate, roc_auc, plot_title)
+    fig = plot_precision_recall_curve_binary(precision, recall, avg_precision, plot_title)
 
     plt.show(fig)
 
@@ -70,10 +70,10 @@ def evaluate_multiple(ground_truths, prediction_scores, compute_micro_macro_avg=
     N = prediction_scores.shape[0]
     M = prediction_scores.shape[1]
 
-    false_positive_rates = {}
-    true_positive_rates = {}
+    precisions = {}
+    recalls = {}
     thresholds = {}
-    roc_aucs = {}
+    avg_precisions = {}
 
     if compute_micro_macro_avg:
         gt_label_array = []
@@ -90,13 +90,13 @@ def evaluate_multiple(ground_truths, prediction_scores, compute_micro_macro_avg=
         prediction_score = prediction_scores[:, class_label]
 
         # Compute ROC curve
-        false_positive_rate, true_positive_rate, threshold = roc_curve(ground_truth_label, prediction_score)
-        roc_auc = auc(false_positive_rate, true_positive_rate)
+        precision, recall, threshold = precision_recall_curve(ground_truth_label, prediction_score)
+        avg_precision = average_precision_score(ground_truth_label, prediction_score)
 
-        false_positive_rates[class_label] = false_positive_rate
-        true_positive_rates[class_label] = true_positive_rate
+        precisions[class_label] = precision
+        recalls[class_label] = recall
         thresholds[class_label] = threshold
-        roc_aucs[class_label] = roc_auc
+        avg_precisions[class_label] = avg_precision
 
         if compute_micro_macro_avg:
             gt_label_array.append(ground_truth_label)
@@ -107,79 +107,63 @@ def evaluate_multiple(ground_truths, prediction_scores, compute_micro_macro_avg=
         prediction_score_array = np.asarray(prediction_score_array)
 
         # Compute Micro Avg.
-        false_positive_rates["micro"], true_positive_rates["micro"], _ = roc_curve(gt_label_array.ravel(),
+        precisions["micro"], recalls["micro"], _ = precision_recall_curve(gt_label_array.ravel(),
                                                                                    prediction_score_array.ravel())
-        roc_aucs["micro"] = auc(false_positive_rates["micro"], true_positive_rates["micro"])
+        avg_precisions["micro"] = average_precision_score(gt_label_array, prediction_score_array, average="micro")
 
-        # Compute Macro Avg.
-        all_fpr = np.unique(np.concatenate([false_positive_rates[i] for i in range(M)]))
+        # # Compute Macro Avg.
+        # precisions["macro"], recall["macro"], _ = precision_recall_curve(gt_label_array.ravel(),
+        #                                                                            prediction_score_array.ravel())
+        # avg_precisions["macro"] = average_precision_score(gt_label_array, prediction_score_array, average="macro")
 
-        # Interpolate all ROC curves at this points
-        mean_tpr = np.zeros_like(all_fpr)
-        for i in range(M):
-            mean_tpr += interp(all_fpr, false_positive_rates[i], true_positive_rates[i])
-
-        # Finally average it and compute AUC
-        mean_tpr /= M
-
-        false_positive_rates["macro"] = all_fpr
-        true_positive_rates["macro"] = mean_tpr
-        roc_aucs["macro"] = auc(false_positive_rates["macro"], true_positive_rates["macro"])
-
-    return false_positive_rates, true_positive_rates, thresholds, roc_aucs
+    return precisions, recalls, thresholds, avg_precisions
 
 
-def plot_roc_curve_multiple(false_positive_rates, true_positive_rates, roc_aucs, plot_title=None):
+def plot_precision_recall_curve_multiple(precisions, recalls, avg_precisions, plot_title=None):
 
     if plot_title is None:
         plot_title = 'ROC Curves'
 
     # Determine how many classes
-    M = len(false_positive_rates)
+    M = len(precisions)
 
     has_micro_macro_avg = False
-    if false_positive_rates.has_key('macro'):
+    if precisions.has_key('micro'):
         has_micro_macro_avg = True
-        M -= 2
+        M -= 1
 
     # Init matplotlib
     fig = plt.figure()
 
     # Draw ROC curve for each class
     for i in range(M):
-        plt.plot(false_positive_rates[i], true_positive_rates[i], label='ROC curve of class {0} (area = {1:0.2f})'
-                                                                        ''.format(i, roc_aucs[i]))
+        plt.plot(precisions[i], recalls[i], label='Precision & Recall of class {0} (AUC = {1:0.2f})'
+                                                                        ''.format(i, avg_precisions[i]))
 
     # Draw Macro and Micro roc curve
     if has_micro_macro_avg:
-        plt.plot(false_positive_rates["micro"], true_positive_rates["micro"],
-                 label='micro-average ROC curve (area = {0:0.2f})'
-                       ''.format(roc_aucs["micro"]),
+        plt.plot(precisions["micro"], recalls["micro"],
+                 label='micro-average Precision & Recall (AUC = {0:0.2f})'
+                       ''.format(avg_precisions["micro"]),
                  linewidth=2)
 
-        plt.plot(false_positive_rates["macro"], true_positive_rates["macro"],
-                 label='macro-average ROC curve (area = {0:0.2f})'
-                       ''.format(roc_aucs["macro"]),
-                 linewidth=2)
-
-    plt.plot([0, 1], [0, 1], 'k--')
-    plt.xlim([0.0, 1.0])
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
     plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
+    plt.xlim([0.0, 1.0])
     plt.title(plot_title)
-    plt.legend(loc="lower right")
+    plt.legend(loc="lower left")
 
     return fig
 
 
-def draw_roc_curve_multiple(ground_truths, prediction_scores, plot_title=None):
+def draw_precision_recall_curve_multiple(ground_truths, prediction_scores, plot_title=None):
 
     # Compute Roc values
-    false_positive_rates, true_positive_rates, thresholds, roc_aucs = \
+    precisions, recalls, thresholds, avg_precisions = \
         evaluate_multiple(ground_truths, prediction_scores, compute_micro_macro_avg=True)
 
     # Plot ROC curve
-    fig = plot_roc_curve_multiple(false_positive_rates, true_positive_rates, roc_aucs, plot_title)
+    fig = plot_precision_recall_curve_multiple(precisions, recalls, avg_precisions, plot_title)
 
     plt.show(fig)
