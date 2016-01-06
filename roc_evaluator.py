@@ -3,6 +3,7 @@ from sklearn.metrics import roc_curve, auc
 from scipy import interp
 import matplotlib.pyplot as plt
 
+
 def evaluate_binary(ground_truth, prediction_scores):
     """
     Evaluate roc curve in binary classification
