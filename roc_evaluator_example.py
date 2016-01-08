@@ -12,5 +12,4 @@ roc.draw_roc_curve_binary(y_true, y_pred)
 # y_true = np.array([0, 1, 0, 0, 2])
 # # prediction probability for each class
 # y_pred = np.array([[0.7, 0.1, 0.2], [0.1, 0.5, 0.4], [0.6, 0.2, 0.2], [0.4, 0.5, 0.1], [0.3, 0.6, 0.1]])
-#
 # roc.draw_roc_curve_multiple(y_true, y_pred)
