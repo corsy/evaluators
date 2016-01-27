@@ -53,6 +53,20 @@ def draw_roc_curve_binary(ground_truth, prediction_score, plot_title=None):
     plt.show(fig)
 
 
+def savefig_roc_curve_binary(fig_file_path, ground_truth, prediction_score, plot_title=None):
+
+    plt.clf()
+
+    # Compute Precision Recall curve
+    precision, recall, thresholds, avg_precision = \
+        evaluate_binary(ground_truth, prediction_score)
+
+    # Plot ROC curve
+    fig = plot_precision_recall_curve_binary(precision, recall, avg_precision, plot_title)
+
+    plt.imsave(fig_file_path)
+
+
 def evaluate_multiple(ground_truths, prediction_scores, compute_micro_macro_avg=False):
     """
 
@@ -163,3 +177,17 @@ def draw_precision_recall_curve_multiple(ground_truths, prediction_scores, plot_
     fig = plot_precision_recall_curve_multiple(precisions, recalls, avg_precisions, plot_title)
 
     plt.show(fig)
+
+
+def savefig_precision_recall_curve_multiple(fig_file_path, ground_truths, prediction_scores, plot_title=None):
+
+    plt.clf()
+
+    # Compute Roc values
+    precisions, recalls, thresholds, avg_precisions = \
+        evaluate_multiple(ground_truths, prediction_scores, compute_micro_macro_avg=True)
+
+    # Plot ROC curve
+    fig = plot_precision_recall_curve_multiple(precisions, recalls, avg_precisions, plot_title)
+
+    plt.savefig(fig_file_path)

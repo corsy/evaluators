@@ -53,6 +53,20 @@ def draw_roc_curve_binary(ground_truth, prediction_score, plot_title=None):
     plt.show(fig)
 
 
+def savefig_roc_curve_binary(fig_file_path, ground_truth, prediction_score, plot_title=None):
+
+    plt.clf()
+
+    # Compute Roc values
+    false_positive_rate, true_positive_rate, threshold, roc_auc = \
+        evaluate_binary(ground_truth, prediction_score)
+
+    # Plot ROC curve
+    fig = plot_roc_curve_binary(false_positive_rate, true_positive_rate, roc_auc, plot_title)
+
+    plt.savefig(fig_file_path)
+
+
 def evaluate_multiple(ground_truths, prediction_scores, compute_micro_macro_avg=False):
     """
 
@@ -184,3 +198,17 @@ def draw_roc_curve_multiple(ground_truths, prediction_scores, plot_title=None):
     fig = plot_roc_curve_multiple(false_positive_rates, true_positive_rates, roc_aucs, plot_title)
 
     plt.show(fig)
+
+
+def savefig_roc_curve_multiple(fig_file_path, ground_truths, prediction_scores, plot_title=None):
+
+    plt.clf()
+
+    # Compute Roc values
+    false_positive_rates, true_positive_rates, thresholds, roc_aucs = \
+        evaluate_multiple(ground_truths, prediction_scores, compute_micro_macro_avg=True)
+
+    # Plot ROC curve
+    fig = plot_roc_curve_multiple(false_positive_rates, true_positive_rates, roc_aucs, plot_title)
+
+    plt.savefig(fig_file_path)
