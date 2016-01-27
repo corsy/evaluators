@@ -26,17 +26,23 @@ def plot_roc_curve_binary(false_positive_rate, true_positive_rate, roc_auc, plot
 
     # Init matplotlib
     fig = plt.figure()
+    ax = plt.subplot(111)
 
-    plt.plot(false_positive_rate, true_positive_rate, label='ROC curve (area = {0:0.2f})'
+    ax.plot(false_positive_rate, true_positive_rate, label='ROC Curve (area = {0:0.2f})'
                                                                         ''.format(roc_auc))
 
-    plt.plot([0, 1], [0, 1], 'k--')
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title(plot_title)
-    plt.legend(loc="lower right")
+    ax.set_xlim([0.0, 1.0])
+    ax.set_ylim([0.0, 1.05])
+
+    ax.plot([0, 1], [0, 1], 'k--')
+    ax.set_xlabel('False Positive Rate')
+    ax.set_ylabel('True Positive Rate')
+    ax.set_title(plot_title)
+
+    # Shrink current axis by 20%
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+    ax.legend(loc="center left", bbox_to_anchor=(1, 0.5), prop={'size':7})
 
     return fig
 
@@ -159,31 +165,38 @@ def plot_roc_curve_multiple(false_positive_rates, true_positive_rates, roc_aucs,
 
     # Init matplotlib
     fig = plt.figure()
+    ax = plt.subplot(111)
 
     # Draw ROC curve for each class
     for i in range(M):
-        plt.plot(false_positive_rates[i], true_positive_rates[i], label='ROC curve of class {0} (area = {1:0.2f})'
+        ax.plot(false_positive_rates[i], true_positive_rates[i], label='class {0} (area = {1:0.2f})'
                                                                         ''.format(i, roc_aucs[i]))
 
     # Draw Macro and Micro roc curve
     if has_micro_macro_avg:
-        plt.plot(false_positive_rates["micro"], true_positive_rates["micro"],
-                 label='micro-average ROC curve (area = {0:0.2f})'
+        ax.plot(false_positive_rates["micro"], true_positive_rates["micro"],
+                 label='micro-avg ROC (area = {0:0.2f})'
                        ''.format(roc_aucs["micro"]),
                  linewidth=2)
 
-        plt.plot(false_positive_rates["macro"], true_positive_rates["macro"],
-                 label='macro-average ROC curve (area = {0:0.2f})'
+        ax.plot(false_positive_rates["macro"], true_positive_rates["macro"],
+                 label='macro-avg ROC (area = {0:0.2f})'
                        ''.format(roc_aucs["macro"]),
                  linewidth=2)
 
-    plt.plot([0, 1], [0, 1], 'k--')
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title(plot_title)
-    plt.legend(loc="lower right")
+
+    ax.set_xlim([0.0, 1.0])
+    ax.set_ylim([0.0, 1.05])
+
+    ax.plot([0, 1], [0, 1], 'k--')
+    ax.set_xlabel('False Positive Rate')
+    ax.set_ylabel('True Positive Rate')
+    ax.set_title(plot_title)
+
+    # Shrink current axis by 20%
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+    ax.legend(loc="center left", bbox_to_anchor=(1, 0.5), prop={'size':7})
 
     return fig
 

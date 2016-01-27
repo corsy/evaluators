@@ -28,15 +28,20 @@ def plot_precision_recall_curve_binary(precision, recall, avg_precision, plot_ti
 
     # Init matplotlib
     fig = plt.figure()
+    ax = plt.subplot(111)
 
-    plt.plot(precision, recall, label='Precision & Recall (AUC = {0:0.2f})'.format(avg_precision))
+    ax.plot(precision, recall, label='Precision & Recall (AUC = {0:0.2f})'.format(avg_precision))
 
-    plt.xlabel('Recall')
-    plt.ylabel('Precision')
-    plt.ylim([0.0, 1.05])
-    plt.xlim([0.0, 1.0])
-    plt.title(plot_title)
-    plt.legend(loc="lower right")
+    ax.set_xlabel('Recall')
+    ax.set_ylabel('Precision')
+    ax.set_ylim([0.0, 1.05])
+    ax.set_xlim([0.0, 1.0])
+    ax.set_title(plot_title)
+
+    # Shrink current axis by 20%
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+    ax.legend(loc="center left", bbox_to_anchor=(1, 0.5), prop={'size':7})
 
     return fig
 
@@ -144,25 +149,30 @@ def plot_precision_recall_curve_multiple(precisions, recalls, avg_precisions, pl
 
     # Init matplotlib
     fig = plt.figure()
+    ax = plt.subplot(111)
 
     # Draw ROC curve for each class
     for i in range(M):
-        plt.plot(precisions[i], recalls[i], label='Precision & Recall of class {0} (AUC = {1:0.2f})'
+        ax.plot(precisions[i], recalls[i], label='class {0} (AUC = {1:0.2f})'
                                                                         ''.format(i, avg_precisions[i]))
 
     # Draw Macro and Micro roc curve
     if has_micro_macro_avg:
-        plt.plot(precisions["micro"], recalls["micro"],
-                 label='micro-average Precision & Recall (AUC = {0:0.2f})'
+        ax.plot(precisions["micro"], recalls["micro"],
+                 label='micro-avg (AUC = {0:0.2f})'
                        ''.format(avg_precisions["micro"]),
                  linewidth=2)
 
-    plt.xlabel('Recall')
-    plt.ylabel('Precision')
-    plt.ylim([0.0, 1.05])
-    plt.xlim([0.0, 1.0])
-    plt.title(plot_title)
-    plt.legend(loc="lower left")
+    ax.set_xlabel('Recall')
+    ax.set_ylabel('Precision')
+    ax.set_ylim([0.0, 1.05])
+    ax.set_xlim([0.0, 1.0])
+    ax.set_title(plot_title)
+
+    # Shrink current axis by 20%
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+    ax.legend(loc="center left", bbox_to_anchor=(1, 0.5), prop={'size':7})
 
     return fig
 
